@@ -19,14 +19,14 @@ namespace StarterAssets
             _playerInputAction.LookInput(virtualLookDirection);
         }
 
-        public void VirtualJumpInput(bool virtualJumpState)
-        {
-            _playerInputAction.JumpInput(virtualJumpState);
-        }
-
         public void VirtualSprintInput(bool virtualSprintState)
         {
             _playerInputAction.SprintInput(virtualSprintState);
+        }
+        
+        public void VirtualShootInput(bool virtualShootState)
+        {
+            _playerInputAction.ShootInput(virtualShootState);
         }
         
     }
