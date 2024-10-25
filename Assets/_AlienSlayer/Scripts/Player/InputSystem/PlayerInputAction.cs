@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -8,30 +9,25 @@ namespace StarterAssets
 	public class PlayerInputAction : MonoBehaviour
 	{
 		[Header("Character Input Values")]
-		public Vector2 move;
-		public Vector2 look;
-		public bool shoot;
-		public bool sprint;
+		public Vector2 Move;
+		public Vector2 ShootDirection;
+		public bool Shoot;
+		public bool Sprint;
+		public bool ChangeGun;
 
 		[Header("Movement Settings")]
-		public bool analogMovement;
-
-		[Header("Mouse Cursor Settings")]
-		public bool cursorLocked = true;
-		public bool cursorInputForLook = true;
+		public bool AnalogMovement;
+		public Action OnChangGunAction;
 
 #if ENABLE_INPUT_SYSTEM
 		public void OnMove(InputValue value)
 		{
 			MoveInput(value.Get<Vector2>());
 		}
-
-		public void OnLook(InputValue value)
+		
+		public void OnShoot(InputValue value)
 		{
-			if(cursorInputForLook)
-			{
-				LookInput(value.Get<Vector2>());
-			}
+			ShootInput(value.Get<Vector2>());
 		}
 
 		public void OnSprint(InputValue value)
@@ -39,42 +35,38 @@ namespace StarterAssets
 			SprintInput(value.isPressed);
 		}
 		
-		public void OnShoot(InputValue value)
+		// public void OnShoot(InputValue value)
+		// {
+		// 	ShootInput(value.isPressed);
+		// }
+		//
+		public void OnChangeGun()
 		{
-			ShootInput(value.isPressed);
+			ChangeGunInput();
 		}
 #endif
 
 
 		public void MoveInput(Vector2 newMoveDirection)
 		{
-			move = newMoveDirection;
-		} 
-
-		public void LookInput(Vector2 newLookDirection)
-		{
-			look = newLookDirection;
+			Move = newMoveDirection;
 		}
-		
 
+		public void ShootInput(Vector2 shootDirection)
+		{
+			
+			Shoot = shootDirection != Vector2.zero;
+			ShootDirection = shootDirection;
+		} 
+		
 		public void SprintInput(bool newSprintState)
 		{
-			sprint = newSprintState;
-		}
-		
-		public void ShootInput(bool newShootState)
-		{
-			shoot = newShootState;
+			Sprint = newSprintState;
 		}
 
-		private void OnApplicationFocus(bool hasFocus)
+		public void ChangeGunInput()
 		{
-			SetCursorState(cursorLocked);
-		}
-
-		private void SetCursorState(bool newState)
-		{
-			Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
+			OnChangGunAction?.Invoke();
 		}
 	}
 	

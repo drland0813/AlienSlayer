@@ -4,7 +4,7 @@ using UnityEngine.AI;
 
 namespace drland.AlienSlayer
 {
-    public class AIAgent : MonoBehaviour
+    public class EnemyAgent : MonoBehaviour
     {
         private NavMeshAgent _agent;
         private Transform _player;

@@ -1,51 +1,78 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace drland.AlienSlayer
 {
-    public class EnemySpawner : MonoBehaviour
+    public class EnemyManager : MonoBehaviour
     {
-        [SerializeField] private GameObject _enemyPrefab;    
-        [SerializeField] private Transform[] _spawnPoints;    
+        [SerializeField] private Enemy _enemyPrefab;    
+        [SerializeField] private Transform _enemyHolder;    
+        [SerializeField] private float _spawnRadius = 20f;      
         [SerializeField] private float _spawnInterval = 5f;    
         [SerializeField] private int _maxEnemies = 10;         
-
-        private int _currentEnemyCount = 0;              
-        private float _timer = 0f;
-
+        [SerializeField] private LayerMask _groundLayer;
+        private int _currentEnemyCount = 0;
+        private bool _isRunning;
+        private List<Enemy> _enemies;
         private void Start()
         {
+            _isRunning = true;
+            _enemies = new List<Enemy>();
             StartCoroutine(SpawnEnemies());
         }
 
         private IEnumerator SpawnEnemies()
         {
-            while (_currentEnemyCount < _maxEnemies)
+            if (!Player.Instance)
             {
-                yield return new WaitForSeconds(_spawnInterval);
-                SpawnEnemy();
+                foreach (var enemy in _enemies)
+                {
+                    enemy.Stop();
+                }
+                yield break;
+            }
+            
+            while (_isRunning)
+            {
+                if (_currentEnemyCount < _maxEnemies)
+                {
+                    yield return new WaitForSeconds(_spawnInterval);
+                    SpawnEnemy();
+                }
+                yield return null;
             }
         }
 
         private void SpawnEnemy()
         {
-            Transform randomSpawnPoint = _spawnPoints[Random.Range(0, _spawnPoints.Length)];
+            Vector3 spawnPosition = GetRandomPositionInRadius();
 
-            GameObject enemy = Instantiate(_enemyPrefab, randomSpawnPoint.position, randomSpawnPoint.rotation);
+            if (Physics.Raycast(spawnPosition, Vector3.down, out RaycastHit hit, Mathf.Infinity, _groundLayer))
+            {
+                var enemy = Instantiate(_enemyPrefab, hit.point, Quaternion.identity, _enemyHolder);
+                _currentEnemyCount++;
+                _enemies.Add(enemy);
+                enemy.GetComponent<Enemy>().OnDeath += () =>
+                {
+                    _currentEnemyCount--;
+                    _enemies.Remove(enemy);
+                };
+            }
+        }
+        
+        private Vector3 GetRandomPositionInRadius()
+        {
+            Vector3 randomDirection = Random.insideUnitSphere * _spawnRadius;
+            randomDirection += transform.position;
 
-            _currentEnemyCount++;
-
-            enemy.GetComponent<Enemy>().OnDeath += () => _currentEnemyCount--;
+            return randomDirection;
         }
 
-        // Vẽ các điểm spawn trong Scene Editor để dễ quan sát
         private void OnDrawGizmosSelected()
         {
-            Gizmos.color = Color.red;
-            foreach (Transform spawnPoint in _spawnPoints)
-            {
-                Gizmos.DrawWireSphere(spawnPoint.position, 1f);
-            }
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position, _spawnRadius);
         }
     }
 }

@@ -9,11 +9,16 @@ namespace drland.AlienSlayer
         [SerializeField] private TwoBoneIKConstraint _leftHandIKConstraint;
         [SerializeField] private TwoBoneIKConstraint _rightHandIKConstraint;
 
+        public void Init()
+        {
+            SetUpHandTarget(false, null, null);
+        }
         public void SetUpHandTarget(bool active, Transform leftHandTarget, Transform rightHandTarget)
         {
-            _rigBuilder.layers[0].active = active;
+            _rigBuilder.enabled = false;
             _leftHandIKConstraint.data.target = active ? leftHandTarget : null;
             _rightHandIKConstraint.data.target = active ? rightHandTarget : null;
+            _rigBuilder.enabled = true;
         }
     }
 }

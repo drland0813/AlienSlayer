@@ -1,9 +1,11 @@
+using System;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace drland.AlienSlayer
 {
-    public class AIStateMachine : MonoBehaviour
+    public class AIAgent : MonoBehaviour
     {
         public enum AIState
         {
@@ -15,23 +17,39 @@ namespace drland.AlienSlayer
 
         [SerializeField] private float _chaseDistance = 10f;
         [SerializeField] private float _attackDistance = 2f;
-        [SerializeField] private float _walkSpeed = 1f;
-        [SerializeField] private float _runSpeed = 3f;
+        [SerializeField] private float _idleWaitTime = 5f; 
+        [SerializeField] private float _patrolRadius = 20f;   
+        [SerializeField] private float _walkSpeed;
+        [SerializeField] private float _runSpeed;
+        [SerializeField] private float _distanceRuntime;
+        [SerializeField] private AIState _state;
 
         private AIState _currentState;
         private EnemyAnimator _animatorManager;
+        private EnemyEntity _enemyEntity;
         private NavMeshAgent _agent;
         private Transform _player;
 
-        void Init()
+        public void Init(EnemyEntity enemyEntity)
         {
-            _animatorManager = GetComponent<EnemyAnimator>();
             _agent = GetComponent<NavMeshAgent>();
-            _currentState = AIState.Idle;
+            _enemyEntity = enemyEntity;
+            _player = Player.Instance.transform;
+            _animatorManager = _enemyEntity.AnimatorManager as EnemyAnimator;
+            _currentState = AIState.ChasePlayer;
+            _walkSpeed = _enemyEntity.StatsManager.Max.Speed;
+            _runSpeed = _walkSpeed * 2;
         }
 
-        void Update()
+        public void UpdateData()
         {
+            if (ReferenceEquals(_player, null))
+            {
+                return;
+            }
+
+            _distanceRuntime = Vector3.Distance(transform.position, _player.position);
+            _state = _currentState;
             switch (_currentState)
             {
                 case AIState.Idle:
@@ -46,12 +64,14 @@ namespace drland.AlienSlayer
                 case AIState.Death:
                     Death();
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             _animatorManager.PlayWalkAnim(_agent.velocity.magnitude);
         }
 
-        void Idle()
+        private void Idle()
         {
             _agent.isStopped = true;
             _animatorManager.PlayWalkAnim(0);
@@ -62,47 +82,58 @@ namespace drland.AlienSlayer
             }
         }
 
-        void ChasePlayer()
+        private void ChasePlayer()
         {
             _agent.isStopped = false;
             _agent.SetDestination(_player.position);
-
             float distanceToPlayer = Vector3.Distance(transform.position, _player.position);
 
             if (distanceToPlayer <= _attackDistance)
             {
                 ChangeState(AIState.Attack);
             }
-            else if (distanceToPlayer > _chaseDistance)
-            {
-                ChangeState(AIState.Idle);
-            }
+            // else if (distanceToPlayer > _chaseDistance)
+            // {
+            //     ChangeState(AIState.Idle);
+            // }
 
-            // Nếu khoảng cách lớn, chạy nhanh hơn
             _agent.speed = distanceToPlayer > _attackDistance ? _runSpeed : _walkSpeed;
+            _animatorManager.PlayWalkAnim(_agent.velocity.magnitude);
         }
 
-        void Attack()
+        private void Attack()
         {
-            _agent.isStopped = true;
-            _animatorManager.PlayAttackAnim();
-
-            if (Vector3.Distance(transform.position, _player.position) > _attackDistance)
+            if (!_animatorManager.Animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
             {
-                _agent.isStopped = false;
-                ChangeState(AIState.ChasePlayer);
+                _agent.isStopped = true;
+                _animatorManager.EnableAttackLayer(true);
+                _animatorManager.PlayAttackAnim();
             }
+            if (_animatorManager.Animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+            {
+                return;
+            }
+
+            if (!(Vector3.Distance(transform.position, _player.position) > _attackDistance)) return;
+            
+            _agent.isStopped = false;
+            _animatorManager.EnableAttackLayer(false);
+            ChangeState(AIState.ChasePlayer);
         }
 
         private void Death()
         {
-            _animatorManager.PlayDeathAnim();
             _agent.isStopped = true;
         }
 
-        private void ChangeState(AIState newState)
+        public void ChangeState(AIState newState)
         {
             _currentState = newState;
+        }
+
+        public void Stop()
+        {
+            _agent.Stop();
         }
     }
 

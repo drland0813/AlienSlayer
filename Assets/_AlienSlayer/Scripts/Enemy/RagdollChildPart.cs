@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace drland.AlienSlayer
@@ -6,5 +7,11 @@ namespace drland.AlienSlayer
     {
         public Rigidbody Rigid;
         public Collider Collider;
+
+        private void Awake()
+        {
+            Rigid = GetComponent<Rigidbody>();
+            Collider = GetComponent<Collider>();
+        }
     }
 }

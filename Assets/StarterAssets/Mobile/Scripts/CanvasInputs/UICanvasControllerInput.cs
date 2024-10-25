@@ -13,20 +13,26 @@ namespace StarterAssets
         {
             _playerInputAction.MoveInput(virtualMoveDirection);
         }
-
-        public void VirtualLookInput(Vector2 virtualLookDirection)
+        
+        public void VirtualRotateAndShoot(Vector2 virtualMoveDirection)
         {
-            _playerInputAction.LookInput(virtualLookDirection);
+            _playerInputAction.ShootInput(virtualMoveDirection);
         }
+
 
         public void VirtualSprintInput(bool virtualSprintState)
         {
             _playerInputAction.SprintInput(virtualSprintState);
         }
         
-        public void VirtualShootInput(bool virtualShootState)
+        // public void VirtualShootInput(bool virtualShootState)
+        // {
+        //     _playerInputAction.ShootInput(virtualShootState);
+        // }
+        
+        public void VirtualChangeGunInput()
         {
-            _playerInputAction.ShootInput(virtualShootState);
+            _playerInputAction.ChangeGunInput();
         }
         
     }

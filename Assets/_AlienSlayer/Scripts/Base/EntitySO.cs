@@ -7,6 +7,7 @@ namespace drland.AlienSlayer
     {
         public EntityType Type;
         public EntityStats Stats;
-        public GameObject GameObject;
+        public GameObject Prefab;
+        public string Name;
     }
 }

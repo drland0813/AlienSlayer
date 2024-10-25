@@ -5,15 +5,25 @@ namespace drland.AlienSlayer
     [Serializable]
     public class EntityStats
     {
-        public float Health;
+        public int Health;
         public float Speed;
-        public float Damage;
+        public int Damage;
         public float Armor;
         public float AttackSpeed;
         public float AttackRange;
+
+        public EntityStats(EntityStats stats)
+        {
+            Health = stats.Health;
+            Speed = stats.Speed;
+            Damage = stats.Damage;
+            Armor = stats.Armor;
+            AttackSpeed = stats.AttackSpeed;
+            AttackRange = stats.AttackRange;
+
+        }
     }
 
-    [Serializable]
     public class StatsManager
     {
         private EntityStats _maxStats;
@@ -24,8 +34,8 @@ namespace drland.AlienSlayer
 
         public StatsManager(EntityStats maxStats)
         {
-            _maxStats = maxStats;
-            _currentStats = new EntityStats();
+            _maxStats = new EntityStats(maxStats);
+            _currentStats = new EntityStats(maxStats);
         }
     }
 }

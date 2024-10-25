@@ -17,6 +17,7 @@ namespace drland.AlienSlayer
             if (_holder.childCount == 0) return;
 
             Destroy(_holder.GetChild(0).gameObject);
+            gameObject.transform.eulerAngles = new Vector3();
         }
     }
 }   

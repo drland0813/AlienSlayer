@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 	
-namespace Drland.Cook
+namespace Drland.Common.Utils
 {
 	public abstract class StaticSingleton<T> : MonoBehaviour where T : MonoBehaviour
 	{

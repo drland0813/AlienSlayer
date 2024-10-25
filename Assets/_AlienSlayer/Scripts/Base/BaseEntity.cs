@@ -8,15 +8,16 @@ namespace drland.AlienSlayer
     public enum EntityType
     {
         Player,
-        BabyAlien,
+        Zombie,
         Boss
     }
 
     public abstract class BaseEntity : MonoBehaviour
     {
-        [SerializeField] protected EntitySO _entitySO;
+        [SerializeField] public EntitySO _entitySO;
         public StatsManager StatsManager;
         public AnimatorManager AnimatorManager;
+        [SerializeField] protected EntityStats _currentStats;
 
         protected virtual void Awake()
         {
@@ -24,9 +25,14 @@ namespace drland.AlienSlayer
             StatsManager = new StatsManager(_entitySO.Stats);
         }
 
-        public virtual void Init()
+        public void Init()
         {
             AnimatorManager.Init();
+        }
+
+        private void Update()
+        {
+            _currentStats = StatsManager.Current;
         }
     }
 }

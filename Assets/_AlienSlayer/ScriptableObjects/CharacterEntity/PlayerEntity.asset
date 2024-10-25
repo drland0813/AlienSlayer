@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Type: 0
   Stats:
-    Health: 1000
-    Speed: 2
+    Health: 100
+    Speed: 5
     Damage: 100
     Armor: 50
     AttackSpeed: 1.2
     AttackRange: 100
-  GameObject: {fileID: 0}
+  Prefab: {fileID: 0}
+  Name: Player

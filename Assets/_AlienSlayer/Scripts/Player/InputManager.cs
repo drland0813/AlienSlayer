@@ -22,5 +22,7 @@ namespace drland.AlienSlayer
 #endif
             Action = GetComponent<PlayerInputAction>();
         }
+        
+        
     }
 }

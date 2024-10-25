@@ -6,7 +6,7 @@ namespace drland.AlienSlayer
     {
         public HealthComponent HealthComponent;
 
-        public void TakeDamage(int damage, Vector3 direction)
+        public void TakeDamage(int damage)
         {
             HealthComponent.TakeDamage(damage);
         }

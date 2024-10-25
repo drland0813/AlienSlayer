@@ -5,11 +5,14 @@ namespace drland.AlienSlayer
     [RequireComponent(typeof(Animator))]
     public class AnimatorManager : MonoBehaviour
     {
-        private int _animIDSpeed;
-        private int _animIDGrounded;
-        private int _animIDMotionSpeed;
+        protected int _animIDSpeed;
+        protected int _animIDMotionSpeed;
+        protected int _animIDDeath;
+
         
-        private Animator _animator;
+        protected Animator _animator;
+
+        public Animator Animator => _animator;
         
         public void Init()
         {
@@ -17,18 +20,13 @@ namespace drland.AlienSlayer
             AssignAnimationIDs();
         }
         
-        private void AssignAnimationIDs()
+        protected virtual void AssignAnimationIDs()
         {
             _animIDSpeed = Animator.StringToHash("Speed");
-            _animIDGrounded = Animator.StringToHash("Grounded");
             _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
+            _animIDDeath = Animator.StringToHash("Death");
         }
 
-        public void PlayGroundAnim(bool value)
-        {
-            _animator.SetBool(_animIDGrounded, value);
-        }
-        
         public void PlayWalkAnim(float value)
         {
             _animator.SetFloat(_animIDSpeed, value);
@@ -37,6 +35,11 @@ namespace drland.AlienSlayer
         public void PlaySprintAnim(float value)
         {
             _animator.SetFloat(_animIDMotionSpeed, value);
+        }
+        
+        public void PlayDeathAnim()
+        {
+            _animator.SetTrigger(_animIDDeath);
         }
     }
 }

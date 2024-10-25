@@ -11,12 +11,13 @@ namespace drland.AlienSlayer
     public class MovementManager : MonoBehaviour
     {
         [Header("Player")]
+        
         [SerializeField] private float _moveSpeed;
 
         [SerializeField] private float _sprintSpeed;
 
         [Range(0.0f, 0.3f)]
-        public float RotationSmoothTime = 0.12f;
+        public float RotationSmoothTime = 0.24f;
 
         public float SpeedChangeRate = 10.0f;
 
@@ -29,21 +30,22 @@ namespace drland.AlienSlayer
 
         public float GroundedOffset = -0.14f;
 
-        public float GroundedRadius = 0.28f;
+        public float GroundedRadius = 0.32f;
 
         public LayerMask GroundLayers;
 
         private float _speed;
         private float _animationBlend;
         private float _targetRotation = 0.0f;
+        private float _targetShootRotation = 0.0f;
+
         private float _rotationVelocity;
         private float _verticalVelocity;
-        private float _terminalVelocity = 53.0f;
 
 
         private CharacterController _controller;
         private InputManager _input;
-        private AnimatorManager _animatorManager;
+        private PlayerAnimator _animatorManager;
         private Camera _mainCamera;
 
         public void Init()
@@ -61,6 +63,7 @@ namespace drland.AlienSlayer
         {
             GroundedCheck();
             Move();
+            RotateAndShoot();
         }
 
         private void GroundedCheck()
@@ -75,17 +78,18 @@ namespace drland.AlienSlayer
 
         private void Move()
         {
-            float targetSpeed = _input.Action.sprint ? _sprintSpeed : _moveSpeed;
+
+            float targetSpeed = _input.Action.Sprint ? _sprintSpeed : _moveSpeed;
 
             // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // if there is no input, set the target speed to 0
-            if (_input.Action.move == Vector2.zero) targetSpeed = 0.0f;
+            if (_input.Action.Move == Vector2.zero) targetSpeed = 0.0f;
 
             // a reference to the players current horizontal velocity
             float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
 
             float speedOffset = 0.1f;
-            float inputMagnitude = _input.Action.analogMovement ? _input.Action.move.magnitude : 1f;
+            float inputMagnitude = _input.Action.AnalogMovement ? _input.Action.Move.magnitude : 1f;
 
             // accelerate or decelerate to target speed
             if (currentHorizontalSpeed < targetSpeed - speedOffset ||
@@ -108,30 +112,49 @@ namespace drland.AlienSlayer
             if (_animationBlend < 0.01f) _animationBlend = 0f;
 
             // normalise input direction
-            Vector3 inputDirection = new Vector3(_input.Action.move.x, 0.0f, _input.Action.move.y).normalized;
+            Vector3 inputDirection = new Vector3(_input.Action.Move.x, 0.0f, _input.Action.Move.y).normalized;
 
             // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // if there is a move input rotate player when the player is moving
-            if (_input.Action.move != Vector2.zero)
+            if (_input.Action.Move != Vector2.zero)
             {
                 _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
                                   _mainCamera.transform.eulerAngles.y;
-                float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
-                    RotationSmoothTime);
 
-                // rotate to face input direction relative to camera position
-                transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+            
+                // // rotate to face input direction relative to camera position
+                if (!_input.Action.Shoot)
+                {
+                    float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
+                        RotationSmoothTime);
+                    transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+                }
             }
-
-
+            
+            
             Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+            Vector3 newPosition = targetDirection.normalized * (_speed * Time.deltaTime) +
+                                  new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime;
 
             // move the player
-            _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
-                             new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+            _controller.Move(newPosition);
 
             _animatorManager.PlayWalkAnim(_animationBlend);
             _animatorManager.PlaySprintAnim(inputMagnitude);
+        }
+
+        private void RotateAndShoot()
+        {
+            Vector3 inputDirection = new Vector3(_input.Action.ShootDirection.x, 0.0f, _input.Action.ShootDirection.y).normalized;
+            if (_input.Action.ShootDirection != Vector2.zero)
+            {
+                _targetShootRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
+                                       _mainCamera.transform.eulerAngles.y;
+                float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetShootRotation, ref _rotationVelocity,
+                    RotationSmoothTime);
+
+                transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+            }
         }
         
         private void OnDrawGizmosSelected()

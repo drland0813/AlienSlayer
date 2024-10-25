@@ -4,11 +4,11 @@ namespace drland.AlienSlayer
 {
     public class HitBoxCollider : MonoBehaviour
     {
+        public int Damage;
         private void OnTriggerEnter(Collider other)
         {
-            Debug.Log("deal");
-            IDamageable damageable = other.GetComponent<IDamageable>();
-            damageable?.TakeDamage(10);
+            HealthComponent healthComponent = other.GetComponent<HealthComponent>();
+            healthComponent?.TakeDamage(Damage);
         }
     }
 }

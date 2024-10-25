@@ -1,29 +1,15 @@
+using UnityEditor;
 using UnityEngine;
 
 namespace drland.AlienSlayer
 {
-    public class TrajectoryBezier : TrajectoryBullet
+    public class Trajectory : MonoBehaviour
     {
         [SerializeField] protected LineRenderer _trajectoryLine;
-
+        [SerializeField] protected int _resolution;
         public void EnableTrajectory(bool enable)
         {
-            gameObject.SetActive(enable);    
-        }
-        
-        
-        private void SetUpPoint(Vector3 startPoint, Vector3 nextStartPoint)
-        {
-            
-        }
-    }
-    public class TrajectoryBullet : MonoBehaviour
-    {
-        [SerializeField] protected LineRenderer _trajectoryLine;
-
-        public void EnableTrajectory(bool enable)
-        {
-            gameObject.SetActive(enable);    
+            _trajectoryLine.gameObject.SetActive(enable);
         }
     }
 }

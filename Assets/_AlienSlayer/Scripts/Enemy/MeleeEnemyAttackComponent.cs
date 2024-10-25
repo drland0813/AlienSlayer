@@ -4,16 +4,14 @@ namespace drland.AlienSlayer
 {
     public class MeleeEnemyAttackComponent : EnemyAttackComponent
     {
-        [SerializeField] private Collider[] _collider;
-        
+        [SerializeField] private HitBoxCollider[] _collider;
 
-        private void OnTriggerEnter(Collider other)
+        public override void Init(int damage)
         {
-            Debug.Log("deal");
-            IDamageable damageable = other.GetComponent<IDamageable>();
-            damageable?.TakeDamage(Damage);
+            base.Init(damage);
+            _collider[0].Damage = Damage;
+            _collider[1].Damage = Damage;
         }
-
         public  void StartDealDamage(int index)
         {
             _collider[index].gameObject.SetActive(true);
